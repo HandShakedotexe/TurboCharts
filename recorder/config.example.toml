@@ -1,0 +1,77 @@
+# Configuración del recorder — Fase 0
+# Copia a config.toml y ajusta. Todos los tiempos en segundos.
+
+[recorder]
+data_dir = "./data"
+
+# fsync cada N segundos en lugar de por línea. Con fsync por línea el disco se
+# convierte en el cuello de botella justo durante una cascada.
+fsync_seconds = 5.0
+
+# Los ficheros de la hora en curso se escriben sin comprimir y se comprimen al
+# rotar, para que un corte de luz no destroce un .gz a medio escribir.
+compress_on_rotate = true
+
+# Latido de cobertura. Convierte "no llegó nada" en un dato explícito.
+heartbeat_seconds = 60.0
+
+# RUTA de un fichero, NO una dirección web. Aquí se escribe el estado actual
+# del grabador. La URL de aviso va en heartbeat_url, más abajo.
+health_file = "./data/health.json"
+
+reconnect_min_seconds = 1.0
+reconnect_max_seconds = 60.0
+
+# Binance corta las conexiones a las 24 h. Reciclamos antes, en un momento que
+# elegimos nosotros y no en mitad de una cascada.
+proactive_reconnect_seconds = 82800   # 23 h
+
+# --- Interruptor de hombre muerto ---------------------------------------
+# El riesgo de un grabador no es caerse: es caerse en silencio. En vez de
+# avisar cuando algo falla —lo que exige que el proceso siga vivo para poder
+# avisar— se manda una señal periódica mientras todo va bien, y es el SILENCIO
+# lo que dispara la alarma.
+#
+# Pega aquí la URL de ping de healthchecks.io, Better Stack, Cronitor o
+# similar (todos tienen plan gratuito de sobra para esto) y configura allí el
+# plazo al doble del intervalo. Vacío = nadie te avisa si esto se para.
+heartbeat_url = ""
+heartbeat_seconds_interval = 300.0
+# true  = solo se pinga si TODOS los feeds están arriba
+# false = basta con que haya uno vivo
+heartbeat_require_all_feeds = true
+
+oi_poll_seconds = 30.0
+funding_poll_seconds = 300.0
+reference_refresh_seconds = 21600     # 6 h
+
+# Solo se usa donde no existe un endpoint masivo (Binance open interest).
+# Bybit y OKX se graban enteros con una sola llamada, sin esta lista.
+top_symbols = [
+  "BTCUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT", "DOGEUSDT",
+  "BNBUSDT", "ADAUSDT", "AVAXUSDT", "LINKUSDT", "SUIUSDT",
+  "TONUSDT", "TRXUSDT", "DOTUSDT", "NEARUSDT", "LTCUSDT",
+  "APTUSDT", "ARBUSDT", "OPUSDT", "INJUSDT", "TIAUSDT",
+]
+
+[binance]
+enabled = true
+# OJO CON ESTA URL. Binance separó sus streams en tres endpoints
+# (/public, /market, /private) y desmanteló los antiguos el 2026-04-23.
+# !forceOrder@arr es dato de "market". Con la URL antigua la conexión SE ABRE
+# igual y no llega ni un mensaje nunca: falla en silencio, que es la peor
+# forma de fallar para un grabador.
+ws_url  = "wss://fstream.binance.com/market/stream?streams=!forceOrder@arr"
+rest_url = "https://fapi.binance.com"
+
+[bybit]
+enabled = true
+ws_url  = "wss://stream.bybit.com/v5/public/linear"
+rest_url = "https://api.bybit.com"
+
+[okx]
+enabled = true
+ws_url  = "wss://ws.okx.com:8443/ws/v5/public"
+rest_url = "https://www.okx.com"
+# OKX no tiene bulk de funding; estos son los que se piden uno a uno.
+poll_symbols = ["BTC-USDT-SWAP", "ETH-USDT-SWAP", "SOL-USDT-SWAP"]

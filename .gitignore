@@ -1,0 +1,15 @@
+data/
+config.toml
+.env
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+.DS_Store
+*.log
+recorder.lock
+recorder.lock.info
+test-failures.txt
+
+# worktrees temporales de agentes de Claude Code (copias del repo)
+.claude/worktrees/

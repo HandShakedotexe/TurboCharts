@@ -1,0 +1,17 @@
+[project]
+name = "liqrec"
+version = "0.1.0"
+description = "Recorder de liquidaciones y derivados — Fase 0 de Liquidation Intelligence"
+requires-python = ">=3.11"
+dependencies = []          # a propósito: solo stdlib
+
+[project.scripts]
+liqrec = "liqrec.__main__:main"
+liqrec-doctor = "liqrec.doctor:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["liqrec", "liqrec.adapters"]

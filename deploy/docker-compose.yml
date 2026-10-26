@@ -1,0 +1,20 @@
+services:
+  recorder:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: liq-intel/recorder:0.1.0
+    container_name: liq-recorder
+    restart: unless-stopped
+    stop_grace_period: 30s        # que le dé tiempo a cerrar y comprimir
+    volumes:
+      - ../config.toml:/app/config.toml:ro
+      - liqdata:/data
+    ports:
+      - "127.0.0.1:8787:8787"     # solo local; expón detrás de algo si lo necesitas
+    logging:
+      driver: json-file
+      options: { max-size: "20m", max-file: "5" }
+
+volumes:
+  liqdata:

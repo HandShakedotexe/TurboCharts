@@ -1,0 +1,28 @@
+# /etc/systemd/system/liq-recorder.service
+#   sudo systemctl daemon-reload && sudo systemctl enable --now liq-recorder
+[Unit]
+Description=Liquidation Intelligence recorder (Fase 0)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=liqrec
+WorkingDirectory=/opt/liq-intel/recorder
+ExecStart=/usr/bin/python3 -m liqrec --config /opt/liq-intel/recorder/config.toml --data-dir /var/lib/liqrec --health-port 8787
+Restart=always
+RestartSec=5
+# Margen para cerrar ficheros y comprimir la hora en curso antes de morir.
+TimeoutStopSec=45
+KillSignal=SIGTERM
+
+# El recorder solo necesita leer su código y escribir sus datos.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/liqrec
+StateDirectory=liqrec
+
+[Install]
+WantedBy=multi-user.target
